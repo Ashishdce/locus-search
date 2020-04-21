@@ -63,8 +63,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-height: 500px;
+  max-height: 480px;
   overflow: auto;
+}
+
+.results::-webkit-scrollbar {
+  width: 5px;
+}
+.results::-webkit-scrollbar-thumb {
+  background: #777;
+  border-radius: 5px;
+}
+.results::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 .results .message {

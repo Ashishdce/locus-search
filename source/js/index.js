@@ -1,26 +1,42 @@
 import mockData from '/mocks/data.js';
 import { getElement, debounce, moveCursorToEnd, includesValue } from './utils.js'
 
+/**
+ * Order of displaying the results.
+ */
 const KEYS_ORDER = ['id', 'name', 'pincode', 'items', 'address'];
 
+/**
+ * Represents the app
+ * @constructor
+ */
 class App {
   constructor() {
     this._value = '';
     this._currentHighlighted;
 
+    /**
+     * All the DOM references needed
+     */
     this.inputWrapper = getElement('.input-wrapper');
     this.inputElem = getElement('input[type="text"]');
     this.clearSearchButton = getElement('.close-icon');
     this.resultsWrapper = getElement('.results');
     this.loader = getElement('.loader-wrapper');
 
+    /**
+     * Add nccessary listeners.
+     */
     this.addListeners();
 
+    /**
+     * Wrapping the function which gets the search result with debounce.
+     */
     this.fetchResults = debounce(this.fetchResults.bind(this));
   }
 
   /**
-   * Getters and setters for the private variables
+   * Getters and setters for the value variable
    */
   get value() {
     return this._value;
@@ -32,6 +48,10 @@ class App {
     this.callStateChangeFunctions();
   }
 
+
+  /**
+   * Getters and setters for the currentHighlighted variable
+   */
   get currentHighlighted() {
     return this._currentHighlighted;
   }
@@ -47,6 +67,10 @@ class App {
     }
   }
 
+  /**
+   * This function is called everytime there is a change in _value property due to input.
+   * It fetches the new search results.
+   */
   callStateChangeFunctions() {
     let value = this.value;
     this.inputElem.value = value;
@@ -62,10 +86,18 @@ class App {
     this.fetchResults(value);
   }
 
+  /**
+   * Function toggles the loader.
+   * @param {boolean} flag - true value shows the lodaer and false hides it.
+   */
   toggleLoader(flag) {
     flag ? this.loader.removeAttribute('hidden') : this.loader.setAttribute('hidden', 'true');
   }
 
+  /**
+   * Function calls the search function and make the necessary DOM updates.
+   * @param {string} value - Input value that needs to be searched
+   */
   fetchResults(value) {
     if (value) {
       this.search(value).then(results => {
@@ -87,6 +119,10 @@ class App {
     }
   }
 
+  /**
+   * Function scrolls the list elements in the view when use navigates the list 
+   * using mouse or keyboard.
+   */
   scrollIntoView() {
     const {
       y: yParent,
@@ -117,6 +153,10 @@ class App {
     }
   }
 
+  /**
+   * Function returns a promise that resolves to the search results.
+   * @param {string} searchString - string that needs to be searched.
+   */
   search(searchString) {
     return new Promise(resolve => {
       console.log('Searching value: ', searchString);
@@ -137,12 +177,16 @@ class App {
     });
   }
 
+  /**
+   * Function is called from the contructor. 
+   * It adds the ncessary event listeners to all the elements required.
+   */
   addListeners() {
     this.clearSearchButton.addEventListener('click', () => {
       this.value = '';
     });
 
-    this.clearSearchButton.addEventListener('keydown', () => {
+    this.clearSearchButton.addEventListener('keydown', e => {
       const key = e.keyCode ? e.keyCode : e.which;
       if (key === 13) {
         this.inputElem.focus();
@@ -165,7 +209,10 @@ class App {
     this.resultsWrapper.addEventListener('mouseover', this.handleFocus);
     this.resultsWrapper.addEventListener('mouseleave', this.handleFocus);
   }
-
+  /**
+   * Function assigns the new selected element in the list on keyboard navigation.
+   * @param {string} direction - Direction that specifies whether up or down arrow button was clicked. 
+   */
   handleListNavigation(direction) {
     const results = this.resultsWrapper.querySelectorAll('.result-item');
 
@@ -183,6 +230,9 @@ class App {
     }
   }
 
+  /**
+   * Event handler for mouseover and mouse leave events on list wrapper.
+   */
   handleFocus = (e) => {
     if ((e.target.className === 'result-item' || e.target.className === 'result-category') && e.type === 'mouseover') {
       if (e.target.className === 'result-category') {
@@ -198,14 +248,24 @@ class App {
     }
   }
 
-  highlightSearchedText(string, textToHighlight) {
+  /**
+   * Function highlists the searched text in the results for each and every key.
+   * @param {string} value - Actual value of the field
+   * @param {string} textToHighlight - substring of value param that needs to be highlighted.
+   */
+  highlightSearchedText(value, textToHighlight) {
     try {
-      return string.split(textToHighlight).join(`<mark>${textToHighlight}</mark>`);
+      return value.split(textToHighlight).join(`<mark>${textToHighlight}</mark>`);
     } catch (err) {
-      return string;
+      return value;
     }
   }
 
+  /**
+   * Function creates the DOM when new results are recieved.
+   * @param {object} data  - Search results.
+   * @param {string} searchedValue - value searched
+   */
   renderResults(data, searchedValue) {
     this.currentHighlighted = null;
 
@@ -245,4 +305,7 @@ class App {
   }
 }
 
+/**
+ * Craeting an instance.
+ */
 new App();
